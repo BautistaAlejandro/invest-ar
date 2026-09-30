@@ -189,11 +189,11 @@
 
         <section id="inicio" class="pt-8">
             <div class="text-center text-xs sm:text-sm text-slate-500 mb-4 bg-slate-100 py-1.5 px-4 rounded-full w-fit mx-auto">
-                Mercado al día: <span id="last-updated" class="font-semibold text-slate-700">Cargando...</span>
+                Cotizaciones actualizadas: <span id="last-updated" class="font-semibold text-slate-700">Cargando...</span>
             </div>
 
             <h2 class="text-3xl sm:text-4xl font-extrabold text-center text-slate-900 mb-3 tracking-tight">Explore Oportunidades de Inversión</h2>
-            <p class="text-center text-base sm:text-lg text-slate-600 mb-8 max-w-2xl mx-auto">Seleccione su perfil de riesgo para visualizar una propuesta de cartera diversificada y acciones argentinas recomendadas.</p>
+            <p class="text-center text-base sm:text-lg text-slate-600 mb-8 max-w-2xl mx-auto">Seleccione su perfil de riesgo para visualizar una propuesta de cartera diversificada de ejemplo. Contenido educativo: no constituye una recomendación de inversión.</p>
 
             <div class="mb-8 max-w-xs mx-auto">
                 <label for="profileSelector" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2 text-center">Perfil de Inversor</label>
@@ -214,7 +214,7 @@
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between">
                     <div>
                         <h3 class="text-lg font-bold text-center text-slate-800 mb-1">Acciones Destacadas</h3>
-                        <p class="text-center text-xs text-slate-400 mb-4">Seleccionadas por liquidez y fundamentos</p>
+                        <p class="text-center text-xs text-slate-400 mb-4">Ejemplos con fines educativos, no son recomendaciones</p>
                         <ul id="featuredStocksList" class="space-y-3">
                             <li class="p-3 bg-slate-50 border-l-4 border-indigo-500 rounded-r-lg animate-pulse text-sm text-slate-500">Cargando activos...</li>
                         </ul>
@@ -234,17 +234,17 @@
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 text-center">
                     <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Inflación Interanual</h4>
                     <p id="stat-inflation" class="text-3xl sm:text-4xl font-extrabold text-indigo-600 my-1"><span class="loader"></span></p>
-                    <p id="stat-inflation-trend" class="text-xs text-emerald-600 font-medium">Tendencia a la desaceleración</p>
+                    <p id="stat-inflation-trend" class="text-xs text-emerald-600 font-medium">Cargando...</p>
                 </div>
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 text-center">
-                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Dólar Oficial (BNA)</h4>
+                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Dólar Oficial (venta)</h4>
                     <p id="stat-exchange" class="text-3xl sm:text-4xl font-extrabold text-indigo-600 my-1"><span class="loader"></span></p>
-                    <p id="stat-exchange-gap" class="text-xs text-slate-500 font-medium">Brecha CCL reducida</p>
+                    <p id="stat-exchange-gap" class="text-xs text-slate-500 font-medium">Cargando...</p>
                 </div>
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 text-center">
-                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Tasa BADLAR</h4>
+                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Tasa depósitos a 30 días</h4>
                     <p id="stat-interest" class="text-3xl sm:text-4xl font-extrabold text-indigo-600 my-1"><span class="loader"></span></p>
-                    <p id="stat-interest-trend" class="text-xs text-indigo-600 font-medium">Tasas reales de referencia</p>
+                    <p id="stat-interest-trend" class="text-xs text-indigo-600 font-medium">Cargando...</p>
                 </div>
             </div>
 
@@ -257,8 +257,8 @@
         </section>
 
         <section id="sectores" class="pt-8">
-            <h2 class="text-3xl font-extrabold text-center text-slate-900 mb-3 tracking-tight">Sectores Productivos en Expansión</h2>
-            <p class="text-center text-base text-slate-600 mb-6 max-w-2xl mx-auto">Comportamiento relativo de los sectores más dinámicos de la economía frente al promedio bursátil.</p>
+            <h2 class="text-3xl font-extrabold text-center text-slate-900 mb-3 tracking-tight">Sectores de la Economía Argentina</h2>
+            <p class="text-center text-base text-slate-600 mb-6 max-w-2xl mx-auto">Panorama general de sectores relevantes de la economía argentina (contenido educativo, sin cifras de mercado).</p>
             
             <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8">
                 <button class="sector-button active px-4 py-2 bg-slate-200 text-slate-700 text-sm font-semibold rounded-full" data-sector="energia">Energía</button>
@@ -268,13 +268,8 @@
                 <button class="sector-button px-4 py-2 bg-slate-200 text-slate-700 text-sm font-semibold rounded-full" data-sector="agro">Agroindustria</button>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 text-center">Crecimiento Proyectado vs. Mercado (%)</h3>
-                    <div class="chart-container h-80">
-                        <canvas id="sectorChart"></canvas>
-                    </div>
-                </div>
+            <div class="grid grid-cols-1 gap-8 max-w-3xl mx-auto">
+                
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between">
                     <div>
                         <div class="flex items-center gap-2 mb-3">
@@ -286,8 +281,8 @@
                         <p id="sectorCompanies" class="text-indigo-600 font-semibold text-base"></p>
                     </div>
                     <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
-                        <span>Fuente: Reportes trimestrales y balances BYMA</span>
-                        <span class="text-indigo-600 font-semibold">Perspectiva favorable</span>
+                        <span>Contenido educativo, sin datos de mercado en tiempo real</span>
+                        
                     </div>
                 </div>
             </div>
@@ -325,16 +320,16 @@
 
         <section id="cotizaciones" class="pt-8">
             <h2 class="text-3xl font-extrabold text-center text-slate-900 mb-3 tracking-tight">Mercado de Divisas y Cotizaciones</h2>
-            <p class="text-center text-base text-slate-600 mb-8 max-w-2xl mx-auto">Valores de referencia cambiarios del mercado local e internacional frente al Dólar (USD).</p>
+            <p class="text-center text-base text-slate-600 mb-8 max-w-2xl mx-auto">Cotizaciones del dólar en pesos argentinos (ARS). Fuente: DolarAPI.com.</p>
             <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                <th class="p-4">Moneda / Instrumento</th>
-                                <th class="p-4">Símbolo</th>
-                                <th class="p-4 text-right">Valor (en USD)</th>
-                                <th class="p-4 text-right">Variación Diaria</th>
+                                <th class="p-4">Cotización</th>
+                                <th class="p-4">Compra ($)</th>
+                                <th class="p-4 text-right">Venta ($)</th>
+                                <th class="p-4 text-right">Actualizado</th>
                             </tr>
                         </thead>
                         <tbody id="currency-table-body" class="divide-y divide-slate-100 text-sm">
@@ -434,45 +429,64 @@
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, Timestamp, query, orderBy, limit, doc, setDoc, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const mockApi = {
-            fetchEconomicData: async () => {
-                await new Promise(r => setTimeout(r, 350));
-                const now = new Date();
-                const formattedDate = now.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                return {
-                    lastUpdated: formattedDate,
-                    inflationYOY: 32.4,
-                    exchangeRateOfficial: 1419.32,
-                    exchangeRateCCL: 1449.59,
-                    interestRate: 30.5,
-                    macroChartData: {
-                        labels: ['Sept', 'Oct', 'Nov', 'Dic', 'Ene', 'Feb'],
-                        inflation: [2.1, 2.0, 1.8, 2.3, 2.9, 2.7],
-                        interest: [42, 40, 38, 35, 32, 30.5]
+        // ===== Datos reales: DolarAPI (cotizaciones) y ArgentinaDatos (inflación y tasas) =====
+        const AD_BASE = 'https://api.argentinadatos.com/v1/finanzas';
+        const MACRO_CACHE_KEY = 'investar_macro_cache_v1';
+
+        const fetchJSON = async (url, ms = 8000) => {
+            const ctl = new AbortController();
+            const t = setTimeout(() => ctl.abort(), ms);
+            try {
+                const r = await fetch(url, { signal: ctl.signal });
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return await r.json();
+            } finally { clearTimeout(t); }
+        };
+        const fetchRetry = async (url) => {
+            try { return await fetchJSON(url); } catch (e) { return await fetchJSON(url); }
+        };
+        const sortSeries = (arr) => (Array.isArray(arr) ? arr.filter(x => x && x.fecha && typeof x.valor === 'number').sort((x, y) => (x.fecha < y.fecha ? -1 : 1)) : []);
+
+        const dataService = {
+            dolares: () => fetchRetry('https://dolarapi.com/v1/dolares'),
+            async macro() {
+                const today = new Date().toISOString().slice(0, 10);
+                let cache = null;
+                try { cache = JSON.parse(localStorage.getItem(MACRO_CACHE_KEY) || 'null'); } catch (e) { cache = null; }
+                if (cache && cache.day === today && cache.data && cache.data.mensual && cache.data.interanual && cache.data.tasa) {
+                    return { ...cache.data, stale: false };
+                }
+                const [m, i, t] = await Promise.allSettled([
+                    fetchRetry(AD_BASE + '/indices/inflacion'),
+                    fetchRetry(AD_BASE + '/indices/inflacionInteranual'),
+                    fetchRetry(AD_BASE + '/tasas/depositos30Dias')
+                ]);
+                const prev = (cache && cache.data) || {};
+                let stale = false;
+                const pick = (res, key, keep) => {
+                    if (res.status === 'fulfilled') {
+                        const ser = sortSeries(res.value);
+                        if (ser.length) return ser.slice(-keep);
                     }
+                    if (prev[key]) { stale = true; return prev[key]; }
+                    return null;
                 };
-            },
-            fetchSectorData: async () => {
-                await new Promise(r => setTimeout(r, 250));
-                return {
-                    energia: { desc: 'Vaca Muerta continúa liderando las exportaciones energéticas nacionales y el desarrollo de infraestructura.', companies: 'YPF, Pampa Energía, Vista Energy', growth: 8.5 },
-                    tecnologia: { desc: 'Exportación de servicios basados en el conocimiento con alta demanda internacional y costos competitivos.', companies: 'Globant (CEDEAR), MercadoLibre (CEDEAR)', growth: 11.2 },
-                    banca: { desc: 'Expansión de líneas de crédito al sector privado con intermediación financiera bajo entorno de inflación normalizada.', companies: 'Banco Galicia, Banco Macro', growth: 4.8 },
-                    consumo: { desc: 'Recuperación paulatina del poder adquisitivo en segmentos de consumo masivo y marcas líderes.', companies: 'Arcor, Molinos Río de la Plata', growth: 3.1 },
-                    agro: { desc: 'Pilar exportador generador de divisas impulsado por mejoras en la competitividad cambiaria y retenciones.', companies: 'Cresud, Adecoagro (CEDEAR)', growth: 7.2 }
+                const data = {
+                    mensual: pick(m, 'mensual', 24),
+                    interanual: pick(i, 'interanual', 3),
+                    tasa: pick(t, 'tasa', 400)
                 };
-            },
-            fetchCurrencyRates: async () => {
-                await new Promise(r => setTimeout(r, 300));
-                return [
-                    { name: "Peso Argentino (BNA)", symbol: "ARS", rate: 1419.32, change: 0.12 },
-                    { name: "Dólar Contado con Liq.", symbol: "ARS-CCL", rate: 1449.59, change: -0.05 },
-                    { name: "Euro", symbol: "EUR", rate: 0.92, change: 0.08 },
-                    { name: "Real Brasileño", symbol: "BRL", rate: 5.35, change: -0.22 },
-                    { name: "Libra Esterlina", symbol: "GBP", rate: 0.82, change: 0.15 },
-                    { name: "Yen Japonés", symbol: "JPY", rate: 152.10, change: 0.40 }
-                ];
+                try { localStorage.setItem(MACRO_CACHE_KEY, JSON.stringify({ day: today, data })); } catch (e) { /* almacenamiento no disponible */ }
+                return { ...data, stale };
             }
+        };
+
+        const sectorContent = {
+            energia: { desc: 'Vaca Muerta es el principal foco de inversión energética del país, con empresas de petróleo, gas e infraestructura.', companies: 'YPF, Pampa Energía, Vista Energy' },
+            tecnologia: { desc: 'Exportación de servicios basados en el conocimiento, con clientes internacionales y costos en pesos.', companies: 'Globant (CEDEAR), MercadoLibre (CEDEAR)' },
+            banca: { desc: 'Los bancos dependen del crédito al sector privado, de las tasas de interés y del nivel de inflación.', companies: 'Banco Galicia, Banco Macro' },
+            consumo: { desc: 'Empresas de consumo masivo, sensibles al poder adquisitivo de las familias.', companies: 'Arcor, Molinos Río de la Plata' },
+            agro: { desc: 'Sector exportador que genera divisas, influido por precios internacionales, clima y retenciones.', companies: 'Cresud, Adecoagro (CEDEAR)' }
         };
 
         const portfolioData = {
@@ -669,81 +683,98 @@
             document.getElementById('sectorDescription').textContent = data.desc;
             document.getElementById('sectorCompanies').textContent = data.companies;
 
-            if (sChart) {
-                sChart.data.datasets[0].data[0] = data.growth;
-                sChart.update();
-            }
             document.querySelectorAll('.sector-button').forEach(b => b.classList.toggle('active', b.dataset.sector === key));
         }
 
+        const escHTML = (v) => String(v).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+        const fmtDay = (iso) => {
+            const d = new Date(String(iso).length === 10 ? iso + 'T12:00:00' : iso);
+            return isNaN(d) ? '' : d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        };
+        const fmtDateTime = (iso) => {
+            const d = new Date(iso);
+            return isNaN(d) ? '' : d.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        };
+        const fmtMoney = (n) => (typeof n === 'number' ? n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—');
+        const lastOf = (arr) => (Array.isArray(arr) && arr.length ? arr[arr.length - 1] : null);
+        const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+        const NA = 'No disponible';
+
         async function loadData() {
-            try {
-                const [eco, sec, curr] = await Promise.all([
-                    mockApi.fetchEconomicData(),
-                    mockApi.fetchSectorData(),
-                    mockApi.fetchCurrencyRates()
-                ]);
+            const [dRes, mRes] = await Promise.allSettled([dataService.dolares(), dataService.macro()]);
+            const dolares = dRes.status === 'fulfilled' && Array.isArray(dRes.value) ? dRes.value : null;
+            const macro = mRes.status === 'fulfilled' ? mRes.value : null;
+            const saved = macro && macro.stale ? ' (dato guardado)' : '';
 
-                document.getElementById('last-updated').textContent = eco.lastUpdated;
-                document.getElementById('stat-inflation').textContent = `${eco.inflationYOY}%`;
-                document.getElementById('stat-exchange').textContent = `$${eco.exchangeRateOfficial}`;
-                document.getElementById('stat-interest').textContent = `${eco.interestRate}%`;
+            const oficial = dolares && dolares.find(d => d.casa === 'oficial');
+            const ccl = dolares && dolares.find(d => d.casa === 'contadoconliqui');
+            setText('last-updated', oficial && oficial.fechaActualizacion ? fmtDateTime(oficial.fechaActualizacion) : NA);
+            setText('stat-exchange', oficial ? '$' + fmtMoney(oficial.venta) : NA);
+            if (oficial && ccl && oficial.venta) {
+                const gap = ((ccl.venta - oficial.venta) / oficial.venta) * 100;
+                setText('stat-exchange-gap', 'Brecha CCL: ' + gap.toFixed(1) + '% · DolarAPI.com');
+            } else {
+                setText('stat-exchange-gap', 'Fuente: DolarAPI.com');
+            }
 
-                const gap = ((eco.exchangeRateCCL - eco.exchangeRateOfficial) / eco.exchangeRateOfficial) * 100;
-                document.getElementById('stat-exchange-gap').textContent = `Brecha CCL: ${gap.toFixed(2)}%`;
+            const infl = macro && lastOf(macro.interanual);
+            setText('stat-inflation', infl ? infl.valor.toFixed(1) + '%' : NA);
+            setText('stat-inflation-trend', infl ? 'Dato de ' + fmtDay(infl.fecha) + ' · INDEC vía ArgentinaDatos' + saved : 'Fuente: ArgentinaDatos');
+            const tasaRaw = macro && lastOf(macro.tasa);
+            const tasaVal = tasaRaw ? (tasaRaw.valor < 2 ? tasaRaw.valor * 100 : tasaRaw.valor) : null;
+            setText('stat-interest', tasaVal !== null ? tasaVal.toFixed(1) + '%' : NA);
+            setText('stat-interest-trend', tasaRaw ? 'Dato de ' + fmtDay(tasaRaw.fecha) + ' · BCRA vía ArgentinaDatos' + saved : 'Fuente: ArgentinaDatos');
 
-                const macroCanvas = document.getElementById('macroChart');
-                if (macroCanvas) {
-                    if (mChart) mChart.destroy();
-                    mChart = new Chart(macroCanvas.getContext('2d'), {
-                        type: 'line',
-                        data: {
-                            labels: eco.macroChartData.labels,
-                            datasets: [
-                                { label: 'Inflación Mensual (%)', data: eco.macroChartData.inflation, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', tension: 0.3, fill: true },
-                                { label: 'Tasa BADLAR (%)', data: eco.macroChartData.interest, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', tension: 0.3, fill: false }
-                            ]
-                        },
-                        options: {
-                            maintainAspectRatio: false,
-                            plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { family: 'Inter', size: 12 } } } },
-                            scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
-                        }
-                    });
-                }
+            const macroCanvas = document.getElementById('macroChart');
+            if (macroCanvas && macro && macro.mensual && macro.mensual.length) {
+                const meses = macro.mensual.slice(-12);
+                const labels = meses.map(p => new Date(p.fecha + 'T12:00:00').toLocaleDateString('es-AR', { month: 'short', year: '2-digit' }));
+                const tasaPorMes = meses.map(p => {
+                    if (!macro.tasa) return null;
+                    const key = p.fecha.slice(0, 7);
+                    const l = lastOf(macro.tasa.filter(x => x.fecha.slice(0, 7) === key));
+                    return l ? (l.valor < 2 ? l.valor * 100 : l.valor) : null;
+                });
+                if (mChart) mChart.destroy();
+                mChart = new Chart(macroCanvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [
+                            { label: 'Inflación mensual (%)', data: meses.map(p => p.valor), borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', tension: 0.3, fill: true },
+                            { label: 'Tasa depósitos 30 días (%)', data: tasaPorMes, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', tension: 0.3, fill: false, spanGaps: true }
+                        ]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { family: 'Inter', size: 12 } } } },
+                        scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+                    }
+                });
+            }
 
-                const currBody = document.getElementById('currency-table-body');
-                if (currBody) {
-                    currBody.innerHTML = curr.map(c => `<tr class="hover:bg-slate-50 transition">
-                        <td class="p-4 font-semibold text-slate-800">${c.name}</td>
-                        <td class="p-4 text-slate-500 font-mono text-xs">${c.symbol}</td>
-                        <td class="p-4 text-right font-bold text-slate-800">${c.rate.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
-                        <td class="p-4 text-right font-semibold ${c.change >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${c.change >= 0 ? '+' : ''}${c.change}%</td>
+            const currBody = document.getElementById('currency-table-body');
+            if (currBody) {
+                if (!dolares) {
+                    currBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">Cotizaciones no disponibles en este momento. Intentá de nuevo más tarde.</td></tr>';
+                } else {
+                    const orden = ['oficial', 'mayorista', 'bolsa', 'contadoconliqui', 'blue', 'cripto', 'tarjeta'];
+                    const filas = orden.map(c => dolares.find(d => d.casa === c)).filter(Boolean);
+                    currBody.innerHTML = filas.map(d => `<tr class="hover:bg-slate-50 transition">
+                        <td class="p-4 font-semibold text-slate-800">Dólar ${escHTML(d.nombre)}</td>
+                        <td class="p-4 text-right text-slate-700">${fmtMoney(d.compra)}</td>
+                        <td class="p-4 text-right font-bold text-slate-800">${fmtMoney(d.venta)}</td>
+                        <td class="p-4 text-right text-xs text-slate-500">${escHTML(fmtDateTime(d.fechaActualizacion))}</td>
                     </tr>`).join('');
                 }
+            }
 
-                window.sectorDataGlobal = sec;
-                const sectorCanvas = document.getElementById('sectorChart');
-                if (sectorCanvas) {
-                    if (sChart) sChart.destroy();
-                    sChart = new Chart(sectorCanvas.getContext('2d'), {
-                        type: 'bar',
-                        data: {
-                            labels: ['Sector Seleccionado', 'Promedio Mercado'],
-                            datasets: [{ data: [sec.energia.growth, 6.0], backgroundColor: ['#4f46e5', '#cbd5e1'], borderRadius: 8 }]
-                        },
-                        options: {
-                            maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
-                            scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
-                        }
-                    });
-                }
+            if (!window.sectorDataGlobal) {
+                window.sectorDataGlobal = sectorContent;
                 updateSector('energia');
-            } catch (err) {
-                console.error("Data loading issue:", err);
             }
         }
+        setInterval(() => { loadData(); }, 15 * 60 * 1000);
 
         document.addEventListener('DOMContentLoaded', () => {
             if (!localStorage.getItem(TERMS_KEY)) {
