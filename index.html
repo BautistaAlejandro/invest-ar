@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invest-AR: Análisis de Inversiones en Argentina</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            scroll-behavior: smooth;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            color: #4f46e5;
+            font-weight: 700;
+            border-bottom: 2px solid #4f46e5;
+        }
+        .sector-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .sector-button.active {
+            background-color: #4f46e5;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+        }
+        .auth-toggle-link {
+            background: none;
+            border: none;
+            padding: 0;
+            font-weight: 600;
+            color: #4f46e5;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .auth-toggle-link:hover {
+            color: #3730a3;
+        }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(15, 23, 42, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+        .terms-content {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        .loader {
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased">
+
+    <!-- Modal de Términos y Condiciones -->
+    <div id="terms-modal" class="modal-overlay hidden">
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-2xl relative m-4 border border-slate-100">
+            <h2 class="text-2xl font-bold text-slate-900 text-center mb-4">Términos y Condiciones de Uso</h2>
+            
+            <div class="terms-content space-y-4 text-sm text-slate-600 pr-2">
+                <p><strong>1. Aceptación de los términos</strong><br>El acceso y uso de este sitio web implican la aceptación plena y sin reservas de los presentes Términos y Condiciones. Si el usuario no está de acuerdo con alguno de los puntos aquí establecidos, deberá abstenerse de utilizar este sitio y sus servicios.</p>
+                <p><strong>2. Naturaleza del sitio</strong><br>El presente sitio web tiene carácter meramente informativo y educativo. Su objetivo es brindar análisis macroeconómicos y proyecciones de mercado destinadas a orientar al usuario. No constituye asesoramiento financiero, jurídico ni contable.</p>
+                <p><strong>3. Responsabilidad del usuario</strong><br>Cada usuario es plena y exclusivamente responsable de las decisiones que adopte en función de la información contenida en este sitio.</p>
+                <p><strong>4. Exención de responsabilidad</strong><br>El titular del sitio no garantiza la exactitud absoluta de la información. El usuario comprende y acepta que toda inversión o transacción bursátil conlleva riesgos de mercado.</p>
+                <p><strong>5. Uso del contenido</strong><br>El contenido del sitio está protegido por las leyes de propiedad intelectual de la República Argentina.</p>
+                <p><strong>6. Modificación de los términos</strong><br>El sitio se reserva el derecho de modificar o actualizar estos términos en cualquier momento.</p>
+                <p><strong>7. Jurisdicción aplicable</strong><br>Toda controversia derivada del uso de este sitio será sometida a las leyes y tribunales competentes de la República Argentina.</p>
+            </div>
+            
+            <button id="accept-terms-btn" class="w-full bg-indigo-600 text-white p-3 rounded-xl font-semibold hover:bg-indigo-700 transition mt-6 shadow-md hover:shadow-lg">
+                Aceptar y Continuar
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Autenticación -->
+    <div id="auth-modal" class="modal-overlay hidden">
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-sm relative m-4 border border-slate-100">
+            <button id="close-modal-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-2xl font-bold">&times;</button>
+            <h2 id="auth-title" class="text-2xl font-bold text-slate-900 text-center mb-6">Iniciar Sesión</h2>
+            
+            <form id="auth-form" class="space-y-4">
+                <div>
+                    <label for="auth-email" class="block text-xs font-semibold uppercase tracking-wider text-slate-600">Email</label>
+                    <input type="email" id="auth-email" class="w-full p-3 mt-1 border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="tu@email.com" required>
+                </div>
+                <div>
+                    <label for="auth-password" class="block text-xs font-semibold uppercase tracking-wider text-slate-600">Contraseña</label>
+                    <input type="password" id="auth-password" class="w-full p-3 mt-1 border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="Mínimo 6 caracteres" required>
+                </div>
+                <div id="auth-password-confirm-field" class="hidden">
+                    <label for="auth-password-confirm" class="block text-xs font-semibold uppercase tracking-wider text-slate-600">Confirmar Contraseña</label>
+                    <input type="password" id="auth-password-confirm" class="w-full p-3 mt-1 border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="Repite tu contraseña">
+                </div>
+                
+                <div id="auth-error" class="text-rose-500 text-xs min-h-[1.25rem] text-center font-medium"></div>
+
+                <button type="submit" id="auth-submit-btn" class="w-full bg-indigo-600 text-white p-3 rounded-xl font-semibold hover:bg-indigo-700 transition shadow-md hover:shadow-lg disabled:opacity-60">
+                    Iniciar Sesión
+                </button>
+            </form>
+            
+            <div class="text-center text-sm mt-4 text-slate-600">
+                <span id="auth-toggle-text">¿No tienes cuenta?</span>
+                <button id="auth-toggle-link" class="auth-toggle-link ml-1" data-mode="register">
+                    Regístrate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-slate-100">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex justify-between items-center">
+            <a href="#inicio" class="text-xl md:text-2xl font-extrabold text-indigo-600 tracking-tight flex items-center gap-2">
+                <span>Invest-AR</span>
+            </a>
+            <div class="hidden md:flex space-x-6 text-sm">
+                <a href="#inicio" class="nav-link text-slate-600 hover:text-indigo-600 font-medium py-1">Inicio</a>
+                <a href="#contexto" class="nav-link text-slate-600 hover:text-indigo-600 font-medium py-1">Contexto</a>
+                <a href="#sectores" class="nav-link text-slate-600 hover:text-indigo-600 font-medium py-1">Sectores</a>
+                <a href="#estrategias" class="nav-link text-slate-600 hover:text-indigo-600 font-medium py-1">Estrategias</a>
+                <a href="#cotizaciones" class="nav-link text-slate-600 hover:text-indigo-600 font-medium py-1">Cotizaciones</a>
+                <a href="#riesgos" class="nav-link text-slate-600 hover:text-indigo-600 font-medium py-1">Riesgos</a>
+                <a href="#reseñas" class="nav-link text-slate-600 hover:text-indigo-600 font-medium py-1">Reseñas</a>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <div id="auth-container" class="hidden md:flex items-center space-x-3 text-sm">
+                    <span id="user-email" class="text-slate-600 font-medium"></span>
+                    <button id="login-modal-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-indigo-700 transition shadow-sm">Iniciar Sesión</button>
+                    <button id="logout-btn" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-medium hover:bg-slate-300 transition hidden">Cerrar Sesión</button>
+                </div>
+                <button id="mobile-menu-btn" class="md:hidden text-slate-700 p-2 rounded-lg hover:bg-slate-100" aria-label="Abrir Menú">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-200 py-3 px-4 shadow-lg">
+            <a href="#inicio" class="block nav-link text-slate-600 font-medium py-2">Inicio</a>
+            <a href="#contexto" class="block nav-link text-slate-600 font-medium py-2">Contexto</a>
+            <a href="#sectores" class="block nav-link text-slate-600 font-medium py-2">Sectores</a>
+            <a href="#estrategias" class="block nav-link text-slate-600 font-medium py-2">Estrategias</a>
+            <a href="#cotizaciones" class="block nav-link text-slate-600 font-medium py-2">Cotizaciones</a>
+            <a href="#riesgos" class="block nav-link text-slate-600 font-medium py-2">Riesgos</a>
+            <a href="#reseñas" class="block nav-link text-slate-600 font-medium py-2">Reseñas</a>
+            <div class="border-t border-slate-100 mt-2 pt-3">
+                <span id="user-email-mobile" class="text-slate-600 block mb-2 font-medium text-xs"></span>
+                <button id="login-modal-btn-mobile" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-indigo-700 transition">Iniciar Sesión</button>
+                <button id="logout-btn-mobile" class="w-full bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-medium hover:bg-slate-300 transition hidden mt-2">Cerrar Sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
+
+        <section id="inicio" class="pt-8">
+            <div class="text-center text-xs sm:text-sm text-slate-500 mb-4 bg-slate-100 py-1.5 px-4 rounded-full w-fit mx-auto">
+                Mercado al día: <span id="last-updated" class="font-semibold text-slate-700">Cargando...</span>
+            </div>
+
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-center text-slate-900 mb-3 tracking-tight">Explore Oportunidades de Inversión</h2>
+            <p class="text-center text-base sm:text-lg text-slate-600 mb-8 max-w-2xl mx-auto">Seleccione su perfil de riesgo para visualizar una propuesta de cartera diversificada y acciones argentinas recomendadas.</p>
+
+            <div class="mb-8 max-w-xs mx-auto">
+                <label for="profileSelector" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2 text-center">Perfil de Inversor</label>
+                <select id="profileSelector" class="w-full p-3 bg-white border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium text-slate-800">
+                    <option value="moderado" selected>Perfil Moderado</option>
+                    <option value="conservador">Perfil Conservador</option>
+                    <option value="agresivo">Perfil Agresivo</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between">
+                    <h3 class="text-lg font-bold text-center text-slate-800 mb-2">Composición Sugerida</h3>
+                    <div class="chart-container my-auto">
+                        <canvas id="portfolioChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-center text-slate-800 mb-1">Acciones Destacadas</h3>
+                        <p class="text-center text-xs text-slate-400 mb-4">Seleccionadas por liquidez y fundamentos</p>
+                        <ul id="featuredStocksList" class="space-y-3">
+                            <li class="p-3 bg-slate-50 border-l-4 border-indigo-500 rounded-r-lg animate-pulse text-sm text-slate-500">Cargando activos...</li>
+                        </ul>
+                    </div>
+                    <div class="mt-4 p-3 bg-indigo-50 rounded-xl text-xs text-indigo-700 text-center font-medium">
+                        Diversificación equilibrada entre instrumentos locales y CEDEARs
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contexto" class="pt-8">
+            <h2 class="text-3xl font-extrabold text-center text-slate-900 mb-3 tracking-tight">Contexto Económico Argentino</h2>
+            <p class="text-center text-base text-slate-600 mb-8 max-w-2xl mx-auto">Variables macroeconómicas fundamentales para entender el ciclo financiero y tasas de rendimiento.</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 text-center">
+                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Inflación Interanual</h4>
+                    <p id="stat-inflation" class="text-3xl sm:text-4xl font-extrabold text-indigo-600 my-1"><span class="loader"></span></p>
+                    <p id="stat-inflation-trend" class="text-xs text-emerald-600 font-medium">Tendencia a la desaceleración</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 text-center">
+                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Dólar Oficial (BNA)</h4>
+                    <p id="stat-exchange" class="text-3xl sm:text-4xl font-extrabold text-indigo-600 my-1"><span class="loader"></span></p>
+                    <p id="stat-exchange-gap" class="text-xs text-slate-500 font-medium">Brecha CCL reducida</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 text-center">
+                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Tasa BADLAR</h4>
+                    <p id="stat-interest" class="text-3xl sm:text-4xl font-extrabold text-indigo-600 my-1"><span class="loader"></span></p>
+                    <p id="stat-interest-trend" class="text-xs text-indigo-600 font-medium">Tasas reales de referencia</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                <h3 class="text-lg font-bold text-center text-slate-800 mb-4">Evolución de Variables Críticas (Inflación vs. Tasa)</h3>
+                <div class="chart-container h-80 sm:h-96">
+                    <canvas id="macroChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="sectores" class="pt-8">
+            <h2 class="text-3xl font-extrabold text-center text-slate-900 mb-3 tracking-tight">Sectores Productivos en Expansión</h2>
+            <p class="text-center text-base text-slate-600 mb-6 max-w-2xl mx-auto">Comportamiento relativo de los sectores más dinámicos de la economía frente al promedio bursátil.</p>
+            
+            <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8">
+                <button class="sector-button active px-4 py-2 bg-slate-200 text-slate-700 text-sm font-semibold rounded-full" data-sector="energia">Energía</button>
+                <button class="sector-button px-4 py-2 bg-slate-200 text-slate-700 text-sm font-semibold rounded-full" data-sector="tecnologia">Tecnología</button>
+                <button class="sector-button px-4 py-2 bg-slate-200 text-slate-700 text-sm font-semibold rounded-full" data-sector="banca">Banca</button>
+                <button class="sector-button px-4 py-2 bg-slate-200 text-slate-700 text-sm font-semibold rounded-full" data-sector="consumo">Consumo Masivo</button>
+                <button class="sector-button px-4 py-2 bg-slate-200 text-slate-700 text-sm font-semibold rounded-full" data-sector="agro">Agroindustria</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 text-center">Crecimiento Proyectado vs. Mercado (%)</h3>
+                    <div class="chart-container h-80">
+                        <canvas id="sectorChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
+                            <h3 id="sectorTitle" class="text-2xl font-bold text-slate-900 capitalize">Energía</h3>
+                        </div>
+                        <p id="sectorDescription" class="text-slate-600 text-sm leading-relaxed mb-6">Cargando análisis sectorial...</p>
+                        <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Compañías Representativas</h4>
+                        <p id="sectorCompanies" class="text-indigo-600 font-semibold text-base"></p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
+                        <span>Fuente: Reportes trimestrales y balances BYMA</span>
+                        <span class="text-indigo-600 font-semibold">Perspectiva favorable</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="estrategias" class="pt-8">
+            <h2 class="text-3xl font-extrabold text-center text-slate-900 mb-3 tracking-tight">Estrategias y Diversificación</h2>
+            <p class="text-center text-base text-slate-600 mb-8 max-w-2xl mx-auto">Equilibre su exposición entre el mercado bursátil local y activos internacionales desde Argentina.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between">
+                    <div>
+                        <div class="inline-block px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg mb-3">Renta Variable Local</div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">Acciones BYMA</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">Permiten invertir directamente en las principales empresas que traccionan la economía argentina (energía, bancos, infraestructura y agro).</p>
+                        <ul class="space-y-2 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 font-bold">✓</span> <span><strong>Potencial de Revalorización:</strong> Gran beneficio ante estabilización económica y compresión del riesgo país.</span></li>
+                            <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">!</span> <span><strong>Riesgo:</strong> Mayor volatilidad regulatoria y sensibilidad al ciclo político nacional.</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between">
+                    <div>
+                        <div class="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-lg mb-3">Cobertura y Diversificación</div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">CEDEARs (Certificados de Depósito)</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">Permiten adquirir acciones de gigantes globales (Apple, Coca-Cola, MercadoLibre, Google) operando en pesos desde cuentas argentinas.</p>
+                        <ul class="space-y-2 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><span class="text-indigo-500 font-bold">✓</span> <span><strong>Dolarización Implícita:</strong> Siguen la cotización del dólar CCL, protegiendo contra devaluaciones.</span></li>
+                            <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">!</span> <span><strong>Riesgo:</strong> Sujetas a la volatilidad de los mercados globales (Wall Street) y ratios de conversión.</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cotizaciones" class="pt-8">
+            <h2 class="text-3xl font-extrabold text-center text-slate-900 mb-3 tracking-tight">Mercado de Divisas y Cotizaciones</h2>
+            <p class="text-center text-base text-slate-600 mb-8 max-w-2xl mx-auto">Valores de referencia cambiarios del mercado local e internacional frente al Dólar (USD).</p>
+            <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                <th class="p-4">Moneda / Instrumento</th>
+                                <th class="p-4">Símbolo</th>
+                                <th class="p-4 text-right">Valor (en USD)</th>
+                                <th class="p-4 text-right">Variación Diaria</th>
+                            </tr>
+                        </thead>
+                        <tbody id="currency-table-body" class="divide-y divide-slate-100 text-sm">
+                            <tr><td colspan="4" class="p-6 text-center text-slate-400"><div class="loader mr-2"></div>Cargando cotizaciones...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="riesgos" class="pt-8">
+            <h2 class="text-3xl font-extrabold text-center text-slate-900 mb-3 tracking-tight">Evaluación de Riesgos</h2>
+            <p class="text-center text-base text-slate-600 mb-8 max-w-2xl mx-auto">Factores críticos que debe considerar antes de ejecutar cualquier asignación de capital.</p>
+            <div class="max-w-3xl mx-auto space-y-3">
+                <div class="risk-item bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <button class="risk-toggle w-full flex justify-between items-center p-5 font-semibold text-slate-900 hover:text-indigo-600 transition text-left">
+                        <span>Riesgo Político y Regulatorio</span>
+                        <span class="text-indigo-600 font-bold text-xl">+</span>
+                    </button>
+                    <div class="risk-content hidden px-5 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+                        Los cambios normativos, regulaciones bancarias y el régimen cambiario representan factores determinantes para la volatilidad de los precios en activos locales.
+                    </div>
+                </div>
+                <div class="risk-item bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <button class="risk-toggle w-full flex justify-between items-center p-5 font-semibold text-slate-900 hover:text-indigo-600 transition text-left">
+                        <span>Liquidez y Profundidad del Mercado</span>
+                        <span class="text-indigo-600 font-bold text-xl">+</span>
+                    </button>
+                    <div class="risk-content hidden px-5 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+                        Ciertas acciones de mediana o baja capitalización bursátil pueden experimentar diferenciales considerables entre puntas de compra y venta (*spread* de liquidez).
+                    </div>
+                </div>
+                <div class="risk-item bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <button class="risk-toggle w-full flex justify-between items-center p-5 font-semibold text-slate-900 hover:text-indigo-600 transition text-left">
+                        <span>Riesgo Macro y Tipo de Cambio</span>
+                        <span class="text-indigo-600 font-bold text-xl">+</span>
+                    </button>
+                    <div class="risk-content hidden px-5 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+                        La fluctuación del tipo de cambio real y la tasa de inflación impactan directamente en los flujos descontados de las empresas con costos en moneda local e ingresos dolarizados.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="reseñas" class="pt-8">
+            <h2 class="text-3xl font-extrabold text-center text-slate-900 mb-3 tracking-tight">Comunidad Invest-AR</h2>
+            <p class="text-center text-base text-slate-600 mb-8 max-w-2xl mx-auto">Experiencias y opiniones compartidas por inversores y analistas.</p>
+
+            <!-- Formulario de reseña -->
+            <div id="review-form-container" class="max-w-2xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/80 mb-8 hidden">
+                <h3 class="text-lg font-bold text-slate-900 mb-2">Comparte tu opinión</h3>
+                <textarea id="review-text" class="w-full p-3 border border-slate-300 rounded-xl mb-4 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm" rows="3" placeholder="Escribe tu análisis o experiencia de inversión..."></textarea>
+                <div class="mb-4 flex items-center justify-between flex-wrap gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-600">Calificación:</span>
+                        <div id="star-rating" class="inline-flex">
+                            <button type="button" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-value="1">★</button>
+                            <button type="button" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-value="2">★</button>
+                            <button type="button" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-value="3">★</button>
+                            <button type="button" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-value="4">★</button>
+                            <button type="button" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-value="5">★</button>
+                        </div>
+                    </div>
+                    <button id="submit-review-btn" class="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-indigo-700 transition shadow-sm text-sm">Publicar Reseña</button>
+                </div>
+                <div id="review-error" class="text-rose-500 text-xs min-h-[1rem] text-center font-medium"></div>
+            </div>
+
+            <!-- Prompt de login -->
+            <div id="review-login-prompt" class="max-w-2xl mx-auto text-center p-6 bg-slate-100 rounded-2xl border border-slate-200">
+                <p class="text-slate-600 text-sm">Para publicar una reseña en la comunidad, por favor <button id="login-prompt-btn" class="auth-toggle-link font-bold">inicia sesión o regístrate</button>.</p>
+            </div>
+
+            <!-- Listado de reseñas -->
+            <div id="reviews-list" class="max-w-2xl mx-auto space-y-4 mt-8">
+                <div class="text-center py-6"><div class="loader"></div><p class="text-slate-400 text-sm mt-2">Cargando reseñas...</p></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 mt-20 py-10 border-t border-slate-800 text-sm">
+        <div class="container mx-auto px-4 text-center">
+            <p class="font-semibold text-slate-300">Invest-AR &copy; 2026. Todos los derechos reservados.</p>
+            <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">La información presentada tiene propósitos didácticos y de análisis general. No constituye asesoramiento financiero regulado.</p>
+            <div class="border-t border-slate-800 my-6 max-w-md mx-auto"></div>
+            <p class="font-semibold text-slate-200">Bautista Alejandro Borda Bossana</p>
+            <div class="flex justify-center items-center gap-4 mt-2 text-xs flex-wrap">
+                <a href="mailto:bautibordabossana@gmail.com" class="hover:text-indigo-400 transition">bautibordabossana@gmail.com</a>
+                <span>&bull;</span>
+                <a href="https://www.linkedin.com/in/bautista-alejandro-borda-bossana-399192293" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-400 transition">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, Timestamp, query, orderBy, limit, doc, setDoc, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const mockApi = {
+            fetchEconomicData: async () => {
+                await new Promise(r => setTimeout(r, 350));
+                const now = new Date();
+                const formattedDate = now.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                return {
+                    lastUpdated: formattedDate,
+                    inflationYOY: 32.4,
+                    exchangeRateOfficial: 1419.32,
+                    exchangeRateCCL: 1449.59,
+                    interestRate: 30.5,
+                    macroChartData: {
+                        labels: ['Sept', 'Oct', 'Nov', 'Dic', 'Ene', 'Feb'],
+                        inflation: [2.1, 2.0, 1.8, 2.3, 2.9, 2.7],
+                        interest: [42, 40, 38, 35, 32, 30.5]
+                    }
+                };
+            },
+            fetchSectorData: async () => {
+                await new Promise(r => setTimeout(r, 250));
+                return {
+                    energia: { desc: 'Vaca Muerta continúa liderando las exportaciones energéticas nacionales y el desarrollo de infraestructura.', companies: 'YPF, Pampa Energía, Vista Energy', growth: 8.5 },
+                    tecnologia: { desc: 'Exportación de servicios basados en el conocimiento con alta demanda internacional y costos competitivos.', companies: 'Globant (CEDEAR), MercadoLibre (CEDEAR)', growth: 11.2 },
+                    banca: { desc: 'Expansión de líneas de crédito al sector privado con intermediación financiera bajo entorno de inflación normalizada.', companies: 'Banco Galicia, Banco Macro', growth: 4.8 },
+                    consumo: { desc: 'Recuperación paulatina del poder adquisitivo en segmentos de consumo masivo y marcas líderes.', companies: 'Arcor, Molinos Río de la Plata', growth: 3.1 },
+                    agro: { desc: 'Pilar exportador generador de divisas impulsado por mejoras en la competitividad cambiaria y retenciones.', companies: 'Cresud, Adecoagro (CEDEAR)', growth: 7.2 }
+                };
+            },
+            fetchCurrencyRates: async () => {
+                await new Promise(r => setTimeout(r, 300));
+                return [
+                    { name: "Peso Argentino (BNA)", symbol: "ARS", rate: 1419.32, change: 0.12 },
+                    { name: "Dólar Contado con Liq.", symbol: "ARS-CCL", rate: 1449.59, change: -0.05 },
+                    { name: "Euro", symbol: "EUR", rate: 0.92, change: 0.08 },
+                    { name: "Real Brasileño", symbol: "BRL", rate: 5.35, change: -0.22 },
+                    { name: "Libra Esterlina", symbol: "GBP", rate: 0.82, change: 0.15 },
+                    { name: "Yen Japonés", symbol: "JPY", rate: 152.10, change: 0.40 }
+                ];
+            }
+        };
+
+        const portfolioData = {
+            moderado: { labels: ['Bonos Soberanos', 'Acciones Sólidas', 'CEDEARs'], data: [30, 40, 30] },
+            conservador: { labels: ['Bonos y Letras', 'Liquidez USD', 'CEDEARs Valor'], data: [50, 25, 25] },
+            agresivo: { labels: ['Acciones Tech', 'Vaca Muerta / Oil', 'CEDEARs Growth'], data: [40, 30, 30] }
+        };
+
+        const stockPresets = {
+            moderado: ['YPF (YPFD) - Liderazgo en Vaca Muerta', 'MercadoLibre (MELI) - Crecimiento regional', 'Vista Energy (VIST) - Eficiencia en shale oil'],
+            conservador: ['Pampa Energía (PAM) - Flujo diversificado', 'Coca-Cola (KO - CEDEAR) - Renta defensiva', 'Bonos AL30 / GD35 - Renta fija soberana'],
+            agresivo: ['Globant (GLOB - CEDEAR) - Transformación digital', 'Tenaris (TS) - Suministro global Oil & Gas', 'Amazon (AMZN - CEDEAR) - Cloud e IA']
+        };
+
+        let auth = null, db = null, currentUser = null;
+        let pChart = null, mChart = null, sChart = null;
+        let currentRating = 0;
+        const appId = 'default-invest-ar-app';
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyDIjc-IO3rXm_8M5JQfUb1VcL6axIbLE_8",
+            authDomain: "invest-ar.firebaseapp.com",
+            projectId: "invest-ar",
+            storageBucket: "invest-ar.firebasestorage.app",
+            messagingSenderId: "959475204104",
+            appId: "1:959475204104:web:41793742dff4c4af9bd1bd"
+        };
+        const TERMS_KEY = 'investar_terms_accepted_2026';
+        const LOCAL_USER_KEY = 'investar_local_user';
+        const LOCAL_REVIEWS_KEY = 'investar_local_reviews';
+
+        function updateUI(user) {
+            currentUser = user;
+            const email = user ? (user.email || 'Usuario') : '';
+            const emailTag = email.length > 20 ? email.substring(0, 18) + '...' : email;
+
+            const uEmail = document.getElementById('user-email');
+            const uEmailMobile = document.getElementById('user-email-mobile');
+            if (uEmail) uEmail.textContent = emailTag;
+            if (uEmailMobile) uEmailMobile.textContent = emailTag;
+
+            document.getElementById('login-modal-btn')?.classList.toggle('hidden', !!user);
+            document.getElementById('login-modal-btn-mobile')?.classList.toggle('hidden', !!user);
+            document.getElementById('logout-btn')?.classList.toggle('hidden', !user);
+            document.getElementById('logout-btn-mobile')?.classList.toggle('hidden', !user);
+            document.getElementById('review-form-container')?.classList.toggle('hidden', !user);
+            document.getElementById('review-login-prompt')?.classList.toggle('hidden', !!user);
+        }
+
+        function setAuthMode(mode) {
+            const title = document.getElementById('auth-title');
+            const submit = document.getElementById('auth-submit-btn');
+            const confirm = document.getElementById('auth-password-confirm-field');
+            const toggleText = document.getElementById('auth-toggle-text');
+            const toggleLink = document.getElementById('auth-toggle-link');
+            const errorDiv = document.getElementById('auth-error');
+            if (errorDiv) errorDiv.textContent = '';
+            
+            if (mode === 'register') {
+                title.textContent = 'Crear Cuenta';
+                submit.textContent = 'Crear Cuenta';
+                confirm.classList.remove('hidden');
+                toggleText.textContent = '¿Ya tienes cuenta?';
+                toggleLink.textContent = 'Inicia Sesión';
+                toggleLink.dataset.mode = 'login';
+            } else {
+                title.textContent = 'Iniciar Sesión';
+                submit.textContent = 'Iniciar Sesión';
+                confirm.classList.add('hidden');
+                toggleText.textContent = '¿No tienes cuenta?';
+                toggleLink.textContent = 'Regístrate';
+                toggleLink.dataset.mode = 'register';
+            }
+        }
+
+        async function initFirebase() {
+            try {
+                const config = FIREBASE_CONFIG;
+                if (config && config.apiKey && config.projectId) {
+                    const app = initializeApp(config);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+                    setLogLevel('error');
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        try { await signInWithCustomToken(auth, __initial_auth_token); } catch(tErr) { console.warn("Token fallback", tErr); }
+                    }
+
+                    onAuthStateChanged(auth, user => {
+                        updateUI(user || null);
+                    });
+                } else {
+                    throw new Error("No remote config provided");
+                }
+            } catch (err) {
+                console.info("Using resilient local authentication and database layer.");
+                const cached = localStorage.getItem(LOCAL_USER_KEY);
+                updateUI(cached ? JSON.parse(cached) : null);
+            }
+        }
+
+        function loadReviews() {
+            const list = document.getElementById('reviews-list');
+            if (!list) return;
+
+            const showMessage = (msg) => {
+                list.textContent = '';
+                const p = document.createElement('p');
+                p.className = 'text-center text-slate-400 text-sm py-4';
+                p.textContent = msg;
+                list.appendChild(p);
+            };
+
+            const renderItems = (items) => {
+                if (!items || items.length === 0) {
+                    showMessage('Aún no hay reseñas registradas. ¡Sé el primero en comentar!');
+                    return;
+                }
+                list.textContent = '';
+                items.forEach(r => {
+                    const rating = Math.min(5, Math.max(1, parseInt(r.rating, 10) || 5));
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80';
+                    const head = document.createElement('div');
+                    head.className = 'flex justify-between items-center mb-2';
+                    const author = document.createElement('span');
+                    author.className = 'font-bold text-slate-800 text-sm';
+                    author.textContent = r.userName || 'Inversor';
+                    const stars = document.createElement('span');
+                    stars.className = 'text-amber-400 text-sm';
+                    stars.textContent = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+                    head.append(author, stars);
+                    const body = document.createElement('p');
+                    body.className = 'text-slate-600 text-sm leading-relaxed';
+                    body.textContent = r.text || '';
+                    card.append(head, body);
+                    list.appendChild(card);
+                });
+            };
+
+            if (!db) { showMessage('No se pudieron cargar las reseñas.'); return; }
+            try {
+                onSnapshot(
+                    query(collection(db, 'artifacts', appId, 'public', 'data', 'reviews'), orderBy('createdAt', 'desc'), limit(20)),
+                    snap => renderItems(snap.docs.map(d => d.data())),
+                    err => { console.warn('Reviews error:', err.code); showMessage('No se pudieron cargar las reseñas.'); }
+                );
+            } catch (e) {
+                showMessage('No se pudieron cargar las reseñas.');
+            }
+        }
+
+        function initPortfolioChart() {
+            const canvas = document.getElementById('portfolioChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (pChart) pChart.destroy();
+            pChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: portfolioData.moderado.labels,
+                    datasets: [{
+                        data: portfolioData.moderado.data,
+                        backgroundColor: ['#4f46e5', '#818cf8', '#c7d2fe'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter', size: 12 } } } }
+                }
+            });
+        }
+
+        function updateStocks() {
+            const list = document.getElementById('featuredStocksList');
+            const selector = document.getElementById('profileSelector');
+            if (!list || !selector) return;
+            const profile = selector.value || 'moderado';
+            const stocks = stockPresets[profile] || stockPresets.moderado;
+            list.innerHTML = stocks.map(s => `<li class="p-3 bg-slate-50 border-l-4 border-indigo-500 rounded-r-xl text-slate-700 font-medium text-sm shadow-xs">${s}</li>`).join('');
+            
+            if (pChart && portfolioData[profile]) {
+                pChart.data.labels = portfolioData[profile].labels;
+                pChart.data.datasets[0].data = portfolioData[profile].data;
+                pChart.update();
+            }
+        }
+
+        function updateSector(key) {
+            if (!window.sectorDataGlobal || !window.sectorDataGlobal[key]) return;
+            const data = window.sectorDataGlobal[key];
+            document.getElementById('sectorTitle').textContent = key;
+            document.getElementById('sectorDescription').textContent = data.desc;
+            document.getElementById('sectorCompanies').textContent = data.companies;
+
+            if (sChart) {
+                sChart.data.datasets[0].data[0] = data.growth;
+                sChart.update();
+            }
+            document.querySelectorAll('.sector-button').forEach(b => b.classList.toggle('active', b.dataset.sector === key));
+        }
+
+        async function loadData() {
+            try {
+                const [eco, sec, curr] = await Promise.all([
+                    mockApi.fetchEconomicData(),
+                    mockApi.fetchSectorData(),
+                    mockApi.fetchCurrencyRates()
+                ]);
+
+                document.getElementById('last-updated').textContent = eco.lastUpdated;
+                document.getElementById('stat-inflation').textContent = `${eco.inflationYOY}%`;
+                document.getElementById('stat-exchange').textContent = `$${eco.exchangeRateOfficial}`;
+                document.getElementById('stat-interest').textContent = `${eco.interestRate}%`;
+
+                const gap = ((eco.exchangeRateCCL - eco.exchangeRateOfficial) / eco.exchangeRateOfficial) * 100;
+                document.getElementById('stat-exchange-gap').textContent = `Brecha CCL: ${gap.toFixed(2)}%`;
+
+                const macroCanvas = document.getElementById('macroChart');
+                if (macroCanvas) {
+                    if (mChart) mChart.destroy();
+                    mChart = new Chart(macroCanvas.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: eco.macroChartData.labels,
+                            datasets: [
+                                { label: 'Inflación Mensual (%)', data: eco.macroChartData.inflation, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', tension: 0.3, fill: true },
+                                { label: 'Tasa BADLAR (%)', data: eco.macroChartData.interest, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', tension: 0.3, fill: false }
+                            ]
+                        },
+                        options: {
+                            maintainAspectRatio: false,
+                            plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { family: 'Inter', size: 12 } } } },
+                            scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+                        }
+                    });
+                }
+
+                const currBody = document.getElementById('currency-table-body');
+                if (currBody) {
+                    currBody.innerHTML = curr.map(c => `<tr class="hover:bg-slate-50 transition">
+                        <td class="p-4 font-semibold text-slate-800">${c.name}</td>
+                        <td class="p-4 text-slate-500 font-mono text-xs">${c.symbol}</td>
+                        <td class="p-4 text-right font-bold text-slate-800">${c.rate.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
+                        <td class="p-4 text-right font-semibold ${c.change >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${c.change >= 0 ? '+' : ''}${c.change}%</td>
+                    </tr>`).join('');
+                }
+
+                window.sectorDataGlobal = sec;
+                const sectorCanvas = document.getElementById('sectorChart');
+                if (sectorCanvas) {
+                    if (sChart) sChart.destroy();
+                    sChart = new Chart(sectorCanvas.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: ['Sector Seleccionado', 'Promedio Mercado'],
+                            datasets: [{ data: [sec.energia.growth, 6.0], backgroundColor: ['#4f46e5', '#cbd5e1'], borderRadius: 8 }]
+                        },
+                        options: {
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+                        }
+                    });
+                }
+                updateSector('energia');
+            } catch (err) {
+                console.error("Data loading issue:", err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem(TERMS_KEY)) {
+                document.getElementById('terms-modal')?.classList.remove('hidden');
+            }
+            document.getElementById('accept-terms-btn')?.addEventListener('click', () => {
+                localStorage.setItem(TERMS_KEY, 'true');
+                document.getElementById('terms-modal')?.classList.add('hidden');
+            });
+
+            // Modal triggers
+            const openLogin = () => { setAuthMode('login'); document.getElementById('auth-modal')?.classList.remove('hidden'); };
+            document.getElementById('login-modal-btn')?.addEventListener('click', openLogin);
+            document.getElementById('login-modal-btn-mobile')?.addEventListener('click', openLogin);
+            document.getElementById('login-prompt-btn')?.addEventListener('click', openLogin);
+            document.getElementById('close-modal-btn')?.addEventListener('click', () => document.getElementById('auth-modal')?.classList.add('hidden'));
+            document.getElementById('auth-toggle-link')?.addEventListener('click', (e) => setAuthMode(e.target.dataset.mode));
+
+            // Form Submit for Login/Register with foolproof fallback
+            document.getElementById('auth-form')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const emailInput = document.getElementById('auth-email');
+                const passInput = document.getElementById('auth-password');
+                const confirmInput = document.getElementById('auth-password-confirm');
+                const errorDiv = document.getElementById('auth-error');
+                const submitBtn = document.getElementById('auth-submit-btn');
+
+                const email = emailInput.value.trim();
+                const pass = passInput.value;
+                const isRegister = submitBtn.textContent.includes('Crear');
+
+                errorDiv.textContent = '';
+                if (!email || !pass) {
+                    errorDiv.textContent = 'Por favor complete todos los campos.';
+                    return;
+                }
+                if (pass.length < 6) {
+                    errorDiv.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+                    return;
+                }
+                if (isRegister && pass !== confirmInput.value) {
+                    errorDiv.textContent = 'Las contraseñas no coinciden.';
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Procesando...';
+
+                try {
+                    let userObj = null;
+                    if (auth) {
+                        try {
+                            if (isRegister) {
+                                const res = await createUserWithEmailAndPassword(auth, email, pass);
+                                userObj = { uid: res.user.uid, email: res.user.email };
+                            } else {
+                                const res = await signInWithEmailAndPassword(auth, email, pass);
+                                userObj = { uid: res.user.uid, email: res.user.email };
+                            }
+                        } catch (firebaseErr) {
+                            const msgs = {
+                                'auth/email-already-in-use': 'Este email ya está registrado. Iniciá sesión.',
+                                'auth/invalid-email': 'El email no es válido.',
+                                'auth/weak-password': 'La contraseña es muy débil (mínimo 6 caracteres).',
+                                'auth/invalid-credential': 'Email o contraseña incorrectos.',
+                                'auth/wrong-password': 'Email o contraseña incorrectos.',
+                                'auth/user-not-found': 'Email o contraseña incorrectos.',
+                                'auth/too-many-requests': 'Demasiados intentos. Probá de nuevo en unos minutos.',
+                                'auth/network-request-failed': 'Sin conexión. Revisá tu internet.'
+                            };
+                            console.warn("Auth error:", firebaseErr.code);
+                            errorDiv.textContent = msgs[firebaseErr.code] || 'No se pudo completar la operación. Intentá de nuevo.';
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
+                            return;
+                        }
+                    } else {
+                        errorDiv.textContent = 'No hay conexión con el servidor. Intentá más tarde.';
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
+                        return;
+                    }
+
+                    updateUI(userObj);
+                    document.getElementById('auth-modal')?.classList.add('hidden');
+                    emailInput.value = '';
+                    passInput.value = '';
+                    if (confirmInput) confirmInput.value = '';
+                } catch (err) {
+                    errorDiv.textContent = 'Ocurrió un error. Intente nuevamente.';
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
+                }
+            });
+
+            // Logout
+            const handleLogout = async () => {
+                if (auth) { try { await signOut(auth); } catch(e){} }
+                localStorage.removeItem(LOCAL_USER_KEY);
+                updateUI(null);
+            };
+            document.getElementById('logout-btn')?.addEventListener('click', handleLogout);
+            document.getElementById('logout-btn-mobile')?.addEventListener('click', handleLogout);
+
+            // Review star ratings
+            document.querySelectorAll('.star-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentRating = parseInt(btn.dataset.value);
+                    document.querySelectorAll('.star-btn').forEach(s => {
+                        const val = parseInt(s.dataset.value);
+                        s.classList.toggle('text-amber-400', val <= currentRating);
+                        s.classList.toggle('text-slate-300', val > currentRating);
+                    });
+                });
+            });
+
+            // Submit review
+            document.getElementById('submit-review-btn')?.addEventListener('click', async () => {
+                const textInput = document.getElementById('review-text');
+                const errDiv = document.getElementById('review-error');
+                const text = textInput.value.trim();
+                errDiv.textContent = '';
+
+                if (!text) { errDiv.textContent = 'Escribe tu reseña antes de enviar.'; return; }
+                if (!currentRating) { errDiv.textContent = 'Selecciona una calificación en estrellas.'; return; }
+                if (!currentUser) { errDiv.textContent = 'Inicia sesión para publicar tu reseña.'; return; }
+
+                if (text.length > 300) { errDiv.textContent = 'La reseña no puede superar los 300 caracteres.'; return; }
+                if (!db) { errDiv.textContent = 'No hay conexión con el servidor. Intentá más tarde.'; return; }
+
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reviews', currentUser.uid), {
+                        uid: currentUser.uid,
+                        userName: (currentUser.email || 'Inversor').split('@')[0].substring(0, 30),
+                        text: text,
+                        rating: currentRating,
+                        createdAt: serverTimestamp()
+                    });
+                } catch (e) {
+                    console.warn('Review error:', e.code);
+                    errDiv.textContent = e.code === 'permission-denied'
+                        ? 'No se pudo publicar. Recordá que solo podés dejar una reseña por cuenta.'
+                        : 'No se pudo publicar la reseña. Intentá de nuevo.';
+                    return;
+                }
+
+                textInput.value = '';
+                currentRating = 0;
+                document.querySelectorAll('.star-btn').forEach(s => { s.classList.remove('text-amber-400'); s.classList.add('text-slate-300'); });
+            });
+
+            // Interactive selectors
+            document.getElementById('profileSelector')?.addEventListener('change', updateStocks);
+            document.querySelectorAll('.sector-button').forEach(btn => {
+                btn.addEventListener('click', () => updateSector(btn.dataset.sector));
+            });
+            document.querySelectorAll('.risk-toggle').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const content = btn.nextElementSibling;
+                    const icon = btn.querySelector('span:last-child');
+                    const isHidden = content.classList.contains('hidden');
+                    content.classList.toggle('hidden');
+                    icon.textContent = isHidden ? '−' : '+';
+                });
+            });
+
+            // Mobile menu and smooth navigation
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileBtn?.addEventListener('click', () => mobileMenu?.classList.toggle('hidden'));
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => mobileMenu?.classList.add('hidden'));
+            });
+
+            // Boot initialization
+            initPortfolioChart();
+            updateStocks();
+            loadData();
+            initFirebase().then(() => loadReviews());
+        });
+    </script>
+</body>
+</html>
